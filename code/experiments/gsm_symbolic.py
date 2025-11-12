@@ -194,9 +194,10 @@ class GSMSymbolicExperiment(ExperimentBase):
             # Create test set by excluding validation indices
             remaining_data = [ds_data[i] for i in range(len(ds_data)) if i not in validation_indices]
             
-            # Sample 400 new ones with a different seed for test set
-            random.seed(seed)  # Different seed from validation (8888)
-            test_sample_size = min(400, len(remaining_data))
+            # Sample a new test set with a different seed for test set
+            # Use the configured sample_size to control test set size
+            random.seed(2222)  # Different seed from validation (8888)
+            test_sample_size = min(self.sample_size if self.sample_size is not None else 400, len(remaining_data))
             ds_data = random.sample(remaining_data, test_sample_size)
         elif sample_size is not None:
             # Randomly sample the data

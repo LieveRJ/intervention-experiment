@@ -1,6 +1,6 @@
 """Adaption of LinearReasonigFeature paper to calculate and find best intervention"""
 
-# No imports here
+import torch
 def _format_activations(dataset):
     """Format the activations for the probe model."""
     activations = dataset['residual_activations']

@@ -1,7 +1,7 @@
 import json
 import os
 import logging
-from probe_llama import ProbeLlamaModel
+from code.probe_llama import ProbeLlamaModel
 from datasets import Dataset
 from .experiment_base import ExperimentBase
 
