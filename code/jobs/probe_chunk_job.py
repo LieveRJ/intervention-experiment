@@ -3,7 +3,7 @@ import os
 import time
 
 # Path to your script
-script_path = "/gpfs/home5/jholshuijsen/reasoning-reciting-probing/code/probe_intervention.py"
+script_path = "/gpfs/home5/ljilesen/intervention-experiment/code/probe_intervention.py"
 
 # Base Slurm parameters
 slurm_params = {
@@ -22,19 +22,19 @@ def submit_probe_intervention_chunk_job(alpha, layer, chunk_id):
     if 'base' in EXPERIMENT:
         base = int(EXPERIMENT.split('base')[1])
         run_dir_name = f"base{base}_probe_intervention_alpha_{alpha:.2f}_layer_dofm_{layer}"
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/arithmetic/intervention/base{base}/{INTERVENTION_TYPE}"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/arithmetic/intervention/base{base}/{INTERVENTION_TYPE}"
     
     elif EXPERIMENT == 'chess':
         run_dir_name = f"chess_probe_intervention_alpha_{alpha:.2f}_layer_dofm_{layer}"
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/chess/intervention/{INTERVENTION_TYPE}"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/chess/intervention/{INTERVENTION_TYPE}"
     
     elif EXPERIMENT == 'gsm-symbolic':
         run_dir_name = f"gsm-symbolic_probe_intervention_alpha_{alpha:.2f}_layer_dofm_{layer}"
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/gsm-symbolic/intervention/{INTERVENTION_TYPE}"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/gsm-symbolic/intervention/{INTERVENTION_TYPE}"
 
     elif EXPERIMENT == 'programming':
         run_dir_name = f"programming_probe_intervention_alpha_{alpha:.2f}_layer_dofm_{layer}"
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/programming/intervention/{INTERVENTION_TYPE}"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/programming/intervention/{INTERVENTION_TYPE}"
     
     os.makedirs(output_dir, exist_ok=True)
     

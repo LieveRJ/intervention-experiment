@@ -28,8 +28,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Base input/output paths
-IN_BASE="/home/jholshuijsen/reasoning-reciting-probing/outputs/arithmetic/${EXPERIMENT_TYPE}/llama3_base"
-OUT_BASE="/home/jholshuijsen/reasoning-reciting-probing/results/arithmetic/${EXPERIMENT_TYPE}/llama3_base"
+IN_BASE="/home/ljilesen/intervention-experiment/outputs/arithmetic/${EXPERIMENT_TYPE}/llama3_base"
+OUT_BASE="/home/ljilesen/intervention-experiment/results/arithmetic/${EXPERIMENT_TYPE}/llama3_base"
 
 for BASE in "${BASES[@]}"; do
     # Use provided temp folder if specified, otherwise find it
@@ -52,7 +52,7 @@ for BASE in "${BASES[@]}"; do
     # Create output directory if it doesn't exist
     mkdir -p "$OUT_DIR"
     
-    python /home/jholshuijsen/reasoning-reciting-probing/code/utilities/combine_chunks.py \
+    python /home/ljilesen/intervention-experiment/code/utilities/combine_chunks.py \
         --input_dir "$MATCHED_DIR" \
         --output_dir "$OUT_DIR"
 done

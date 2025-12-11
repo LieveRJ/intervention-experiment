@@ -7,12 +7,12 @@
 #SBATCH --mem=48G
 #SBATCH --time=02:00:00
 #SBATCH --job-name=arith8_opt_collect
-#SBATCH --output=/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/logs/arith8_collect_%j.out
-#SBATCH --error=/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/logs/arith8_collect_%j.err
+#SBATCH --output=/gpfs/home5/ljilesen/intervention-experiment/outputs/logs/arith8_collect_%j.out
+#SBATCH --error=/gpfs/home5/ljilesen/intervention-experiment/outputs/logs/arith8_collect_%j.err
 
 set -euo pipefail
 
-PROJECT_ROOT="/gpfs/home5/jholshuijsen/reasoning-reciting-probing"
+PROJECT_ROOT="/gpfs/home5/ljilesen/intervention-experiment"
 mkdir -p "$PROJECT_ROOT/outputs/logs"
 
 # User-tunable parameters

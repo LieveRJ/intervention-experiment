@@ -8,7 +8,7 @@
 #SBATCH --output=snellius_logs/slurm_%j.out
 #SBATCH --error=snellius_logs/slurm_%j.err
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=j.e.holshuijsen@student.vu.nl
+#SBATCH --mail-user=l.r.lieve.riekie.jilesen@vu.nl
 
 # This script submits a batch job that executes run_experiment.sh
 # This provides a consistent experiment execution between batch and interactive jobs

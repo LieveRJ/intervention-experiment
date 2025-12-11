@@ -77,13 +77,13 @@ def build_intervention_vectors(
 
 def main():
     parser = argparse.ArgumentParser(description="Collect base8 arithmetic activations with optimal direction applied.")
-    parser.add_argument("--project_root", type=str, default="/gpfs/home5/jholshuijsen/reasoning-reciting-probing")
-    parser.add_argument("--direction_path", type=str, default="/home/jholshuijsen/reasoning-reciting-probing/outputs/optimal_directions/arithmetic-base8/optimal_direction.pth")
+    parser.add_argument("--project_root", type=str, default="/gpfs/home5/ljilesen/intervention-experiment")
+    parser.add_argument("--direction_path", type=str, default="/home/ljilesen/intervention-experiment/outputs/optimal_directions/arithmetic-base8/optimal_direction.pth")
     parser.add_argument("--alpha", type=float, default=0.05)
     parser.add_argument("--chunk_size", type=int, default=1000)
     parser.add_argument("--chunk_id", type=int, default=0)
-    parser.add_argument("--input_path", type=str, default="/home/jholshuijsen/reasoning-reciting-probing/inputs/arithmetic/data/base8.txt")
-    parser.add_argument("--output_dir", type=str, default="/home/jholshuijsen/reasoning-reciting-probing/outputs/arithmetic/intervention/optimal_base8_eval/")
+    parser.add_argument("--input_path", type=str, default="/home/ljilesen/intervention-experiment/inputs/arithmetic/data/base8.txt")
+    parser.add_argument("--output_dir", type=str, default="/home/ljilesen/intervention-experiment/outputs/arithmetic/intervention/optimal_base8_eval/")
     parser.add_argument("--inject_layer", type=int, default=-1, help="If >=0, apply only at this layer; otherwise apply at all layers (zeroing first N).")
     parser.add_argument("--zero_first_n", type=int, default=3, help="When applying to all layers, set the first N layers to zero.")
     args = parser.parse_args()

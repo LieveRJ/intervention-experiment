@@ -5,8 +5,8 @@
 ALPHAS=(-0.15 -0.20 -0.30)
 
 # Base input/output paths
-IN_BASE="/home/jholshuijsen/reasoning-reciting-probing/outputs/chess/interventions/liref"
-OUT_BASE="/home/jholshuijsen/reasoning-reciting-probing/results/chess/intervention/liref"
+IN_BASE="/home/ljilesen/intervention-experiment/outputs/chess/interventions/liref"
+OUT_BASE="/home/ljilesen/intervention-experiment/results/chess/intervention/liref"
 
 for ALPHA in "${ALPHAS[@]}"; do
     # Find the folder matching the pattern for this alpha

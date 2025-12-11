@@ -3,7 +3,7 @@ import os
 import time
 
 # Path to your script
-script_path = "/gpfs/home5/jholshuijsen/reasoning-reciting-probing/code/find_best_intervention_dir.py"
+script_path = "/gpfs/home5/ljilesen/intervention-experiment/code/find_best_intervention_dir.py"
 
 # Base Slurm parameters
 slurm_params = {
@@ -19,17 +19,17 @@ slurm_params = {
 # Function to submit a job
 def tune_intervention_dir_job(alpha, layer):
     if EXPERIMENT == 'gsm-symbolic':
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/gsm-symbolic/tuning/"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/gsm-symbolic/tuning/"
     elif EXPERIMENT == 'chess':
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/chess/tuning/"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/chess/tuning/"
     elif EXPERIMENT == 'programming':
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/programming/tuning/"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/programming/tuning/"
     elif 'base' in EXPERIMENT:
         base = int(EXPERIMENT.split('base')[1])
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/arithmetic/tuning/{base}/"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/arithmetic/tuning/{base}/"
     elif 'combined' in EXPERIMENT:
         type = EXPERIMENT.split('_', 1)[1]
-        output_dir = f"/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/combined_directions/{type}/tuning/"
+        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/combined_directions/{type}/tuning/"
     else:
         raise ValueError(f"Experiment {EXPERIMENT} not found")
 

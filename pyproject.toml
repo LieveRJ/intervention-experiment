@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "reasoning-reciting-probing"
+name = "intervention-experiment"
 version = "0.1.0"
 description = ""
-authors = ["j.e.holshuijsen@student.vu.nl"]
+authors = ["l.r.lieve.riekie.jilesen@vu.nl"]
 readme = "README.md"
 package-mode = false
 

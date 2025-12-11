@@ -7,12 +7,12 @@
 #SBATCH --mem=48G
 #SBATCH --time=06:00:00
 #SBATCH --job-name=cross_task_eval
-#SBATCH --output=/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/logs/cross_eval_%j.out
-#SBATCH --error=/gpfs/home5/jholshuijsen/reasoning-reciting-probing/outputs/logs/cross_eval_%j.err
+#SBATCH --output=/gpfs/home5/ljilesen/intervention-experiment/outputs/logs/cross_eval_%j.out
+#SBATCH --error=/gpfs/home5/ljilesen/intervention-experiment/outputs/logs/cross_eval_%j.err
 
 set -euo pipefail
 
-PROJECT_ROOT="/gpfs/home5/jholshuijsen/reasoning-reciting-probing"
+PROJECT_ROOT="/gpfs/home5/ljilesen/intervention-experiment"
 mkdir -p "$PROJECT_ROOT/outputs/logs"
 
 cd "$PROJECT_ROOT"
