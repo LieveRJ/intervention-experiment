@@ -19,7 +19,7 @@ for ALPHA in "${ALPHAS[@]}"; do
     fi
 
     echo "Combining chunks for alpha=${ALPHA} from $MATCHED_DIR"
-    python /home/jholshuijsen/reasoning-reciting-probing/code/utilities/combine_chunks.py \
+    python /home/ljilesen/intervention-experiment/code/utilities/combine_chunks.py \
         --input_dir "$MATCHED_DIR" \
         --output_dir "$OUT_DIR"
 done
