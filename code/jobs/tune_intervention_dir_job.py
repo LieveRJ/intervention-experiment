@@ -1,35 +1,44 @@
-import subprocess
 import os
+import subprocess
 import time
 
 # Path to your script
-script_path = "/gpfs/home5/ljilesen/intervention-experiment/code/find_best_intervention_dir.py"
+script_path = (
+    "/gpfs/home3/ljilesen/intervention-experiment/code/find_best_intervention_dir.py"
+)
 
 # Base Slurm parameters
 slurm_params = {
-    'partition': 'gpu_a100',
-    'nodes': 1,
-    'ntasks': 1,
-    'cpus-per-task': 8,
-    'gpus': 1,
-    'mem': '32G',
-    'time': '0:25:00'
+    "partition": "gpu_a100",
+    "nodes": 1,
+    "ntasks": 1,
+    "cpus-per-task": 8,
+    "gpus": 1,
+    "mem": "32G",
+    "time": "0:25:00",
 }
+
 
 # Function to submit a job
 def tune_intervention_dir_job(alpha, layer):
-    if EXPERIMENT == 'gsm-symbolic':
-        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/gsm-symbolic/tuning/"
-    elif EXPERIMENT == 'chess':
-        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/chess/tuning/"
-    elif EXPERIMENT == 'programming':
-        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/programming/tuning/"
-    elif 'base' in EXPERIMENT:
-        base = int(EXPERIMENT.split('base')[1])
-        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/arithmetic/tuning/{base}/"
-    elif 'combined' in EXPERIMENT:
-        type = EXPERIMENT.split('_', 1)[1]
-        output_dir = f"/gpfs/home5/ljilesen/intervention-experiment/outputs/combined_directions/{type}/tuning/"
+    if EXPERIMENT == "gsm-symbolic":
+        output_dir = (
+            f"/gpfs/home3/ljilesen/intervention-experiment/outputs/gsm-symbolic/tuning/"
+        )
+    elif EXPERIMENT == "chess":
+        output_dir = (
+            f"/gpfs/home3/ljilesen/intervention-experiment/outputs/chess/tuning/"
+        )
+    elif EXPERIMENT == "programming":
+        output_dir = (
+            f"/gpfs/home3/ljilesen/intervention-experiment/outputs/programming/tuning/"
+        )
+    elif "base" in EXPERIMENT:
+        base = int(EXPERIMENT.split("base")[1])
+        output_dir = f"/gpfs/home3/ljilesen/intervention-experiment/outputs/arithmetic/tuning/{base}/"
+    elif "combined" in EXPERIMENT:
+        type = EXPERIMENT.split("_", 1)[1]
+        output_dir = f"/gpfs/home3/ljilesen/intervention-experiment/outputs/combined_directions/{type}/tuning/"
     else:
         raise ValueError(f"Experiment {EXPERIMENT} not found")
 
@@ -47,30 +56,33 @@ def tune_intervention_dir_job(alpha, layer):
     sbatch_cmd = "sbatch "
     for param, value in slurm_params.items():
         sbatch_cmd += f"--{param}={value} "
-    
+
     sbatch_cmd += f"--job-name={run_dir_name} --output={log_dir}/output.out --error={log_dir}/output.err "
 
     if layer is None:
-        sbatch_cmd += f"--wrap=\"poetry run python {script_path} \
+        sbatch_cmd += f'--wrap="poetry run python {script_path} \
         --alpha {alpha} \
         --run_dir {run_dir_name} \
-        --experiment {EXPERIMENT}\""
+        --experiment {EXPERIMENT}"'
     else:
-        sbatch_cmd += f"--wrap=\"poetry run python {script_path} \
+        sbatch_cmd += f'--wrap="poetry run python {script_path} \
         --alpha {alpha} \
         --layer {layer} \
         --run_dir {run_dir_name} \
-        --experiment {EXPERIMENT}\""
+        --experiment {EXPERIMENT}"'
     # Submit the job
     result = subprocess.run(sbatch_cmd, shell=True, capture_output=True, text=True)
-    
+
     if result.returncode == 0:
         job_id = result.stdout.strip().split()[-1]
-        print(f"Submitted job for experiment={EXPERIMENT}, alpha={alpha}, layer={layer}, job ID: {job_id}")
+        print(
+            f"Submitted job for experiment={EXPERIMENT}, alpha={alpha}, layer={layer}, job ID: {job_id}"
+        )
         return job_id
     else:
         print(f"Error submitting job for alpha={alpha}: {result.stderr}")
         return None
+
 
 # Submit a job for each alpha value
 # for layer in range(3, 32):
@@ -78,7 +90,7 @@ def tune_intervention_dir_job(alpha, layer):
 #         continue
 
 
-EXPERIMENT = 'chess'
+EXPERIMENT = "chess"
 
 job_id = tune_intervention_dir_job(0.1, None)
 

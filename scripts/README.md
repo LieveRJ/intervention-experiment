@@ -45,13 +45,13 @@ outputs/
 
 ### Batch Job (for long runs)
 ```bash
-cd ~/reasoning-reciting-probing
+cd ~/interaction-experiment
 sbatch scripts/run_gpu_job.sh
 ```
 
 ### Interactive Session (for development/debugging)
 ```bash
-cd ~/reasoning-reciting-probing
+cd ~/interaction-experiment
 bash scripts/run_gpu_job_live.sh
 ```
 
@@ -75,4 +75,4 @@ For example, for the K&K experiment:
 You can also access specific runs by their job ID and timestamp:
 ```
 ./outputs/k_and_k/job_12345_20230401_120000/
-``` 
+```

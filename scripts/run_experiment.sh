@@ -143,4 +143,4 @@ $CMD 2>&1 | tee "$OUTPUT_DIR/run_log.txt"
 # cp "$(dirname "$0")/run_experiment.sh" "$OUTPUT_DIR/scripts_used/"
 # cp "$(dirname "$0")/create_output_dir.sh" "$OUTPUT_DIR/scripts_used/"
 
-echo "Job complete. Results saved to $OUTPUT_DIR" 
+echo "Job complete. Results saved to $OUTPUT_DIR"

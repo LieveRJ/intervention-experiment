@@ -31,14 +31,12 @@ gsm8k_prompt_template = """As an expert problem solver, solve step by step the f
 
 
 def load_prompt_template(ds_name):
-  
-  if ds_name in ['GSM8k', 'GSM-symbolic', "MGSM"]:
+    if ds_name in ["GSM8k", "GSM-symbolic", "MGSM"]:
+        template = gsm8k_prompt_template
+        template_no_cot = gsm8k_prompt_template
 
-    template = gsm8k_prompt_template
-    template_no_cot = gsm8k_prompt_template
+        return template, template_no_cot
 
-    return template, template_no_cot
-  
 
 def extract_final_answer(model_resp: str) -> float:
     # Remove commas so for example 5,000 becomes 5000
@@ -49,62 +47,74 @@ def extract_final_answer(model_resp: str) -> float:
     return float(extracted_num)
 
 
-def load_dataset(ds_name, dataset_dir, sample_num=3000, split='test'):
-  if ds_name == 'GSM-symbolic':
-    with open(os.path.join(dataset_dir, f'gsm-symbolic_data/GSM_symbolic.jsonl'), 'r') as file:
-        ds_data = []
-        for line in file:
-            ds_data.append(json.loads(line))  # 解析每一行的JSON对象
+def load_dataset(ds_name, dataset_dir, sample_num=3000, split="test"):
+    if ds_name == "GSM-symbolic":
+        with open(
+            os.path.join(dataset_dir, f"gsm-symbolic_data/GSM_symbolic.jsonl"), "r"
+        ) as file:
+            ds_data = []
+            for line in file:
+                ds_data.append(json.loads(line))  # 解析每一行的JSON对象
 
-    for entry in ds_data:
-        entry['final_answer'] = extract_final_answer(model_resp=entry['answer'])
-  return ds_data
+        for entry in ds_data:
+            entry["final_answer"] = extract_final_answer(model_resp=entry["answer"])
+    return ds_data
 
 
-
-def get_prediction(output=None, ds_name='GSM-symbolic'):
-            
-    if ds_name in ['GSM8k', 'GSM-symbolic', 'MGSM']:
-        
-        model_resp = output 
-        #match = re.search(r"\\boxed\{(\d+\.?\d*)\}", model_resp)
+def get_prediction(output=None, ds_name="GSM-symbolic"):
+    if ds_name in ["GSM8k", "GSM-symbolic", "MGSM"]:
+        model_resp = output
+        # match = re.search(r"\\boxed\{(\d+\.?\d*)\}", model_resp)
         match = re.search(r"The final answer is (\d+\.?\d*)", model_resp)
         if match:
-            return float(match.group(1)) 
+            return float(match.group(1))
         else:
-            return None  
-        
+            return None
+
+
 def parse_model_response(model_resp: str) -> float:
-        pattern = "Let's think step by step"
+    pattern = "Let's think step by step"
 
-        # Find all occurrences of the pattern
-        occurrences = [m.start() for m in re.finditer(pattern, model_resp)]
+    # Find all occurrences of the pattern
+    occurrences = [m.start() for m in re.finditer(pattern, model_resp)]
 
-        # Get the ninth occurrence if it exists
-        ninth_idx = occurrences[8] if len(occurrences) >= 9 else -1
-        if ninth_idx != -1:
-            response_after_prompt = model_resp[ninth_idx:]
-            return response_after_prompt
-        else:
-            return model_resp
+    # Get the ninth occurrence if it exists
+    ninth_idx = occurrences[8] if len(occurrences) >= 9 else -1
+    if ninth_idx != -1:
+        response_after_prompt = model_resp[ninth_idx:]
+        return response_after_prompt
+    else:
+        return model_resp
 
-def evaluation_on_dataset(val_sampled_data=None, prompts_cot=None, prompts_no_cot=None, run_in_fewshot=True, run_in_cot=True, 
-                           ablation_dir=None, ds_name='GSM-symbolic', alpha=0.0, prober=None, layer=None):
-    
-    queries_batch = []  
+
+def evaluation_on_dataset(
+    val_sampled_data=None,
+    prompts_cot=None,
+    prompts_no_cot=None,
+    run_in_fewshot=True,
+    run_in_cot=True,
+    ablation_dir=None,
+    ds_name="GSM-symbolic",
+    alpha=0.0,
+    prober=None,
+    layer=None,
+):
+    queries_batch = []
     entry_batch = []
-        
+
     for ix, entry in tqdm(enumerate(val_sampled_data)):
-        
-        if ds_name in ['GSM8k', 'GSM-symbolic', 'MGSM']:
+        if ds_name in ["GSM8k", "GSM-symbolic", "MGSM"]:
             if run_in_fewshot:
                 if run_in_cot:
-                    query = prompts_cot.format(TARGET_QUESTION=entry['question'])
+                    query = prompts_cot.format(TARGET_QUESTION=entry["question"])
                 else:
-                    query = prompts_no_cot.format(TARGET_QUESTION=entry['question'])
+                    query = prompts_no_cot.format(TARGET_QUESTION=entry["question"])
             else:
-                query = 'You are an expert problem solver. Solve the following problem and give your final answer in the following format:  \"\\boxed{yes}\".\n\nQ: ' + entry['question'] + "\n\nA: "
-
+                query = (
+                    'You are an expert problem solver. Solve the following problem and give your final answer in the following format:  "\\boxed{yes}".\n\nQ: '
+                    + entry["question"]
+                    + "\n\nA: "
+                )
 
         queries_batch.append(query)
         entry_batch.append(entry)
@@ -116,44 +126,54 @@ def evaluation_on_dataset(val_sampled_data=None, prompts_cot=None, prompts_no_co
     )
 
     for entry, response in zip(entry_batch, responses_dataset):
-        answer = parse_model_response(response['intervention_response'])
-        entry['solution'] = answer
+        answer = parse_model_response(response["intervention_response"])
+        entry["solution"] = answer
         prediction = get_prediction(answer, ds_name)
 
         if entry["final_answer"] == prediction:
-            entry['model_predict_correctness'] = True
+            entry["model_predict_correctness"] = True
         else:
-            entry['model_predict_correctness'] = False
+            entry["model_predict_correctness"] = False
 
     # Save the entry list to a json file
     if layer is not None:
-        output_file = os.path.join(f'./outputs/liref-check/all-layers/{alpha}-liref_gsm_symbolic_layer_{layer}.json')
+        output_file = os.path.join(
+            f"./outputs/liref-check/all-layers/{alpha}-liref_gsm_symbolic_layer_{layer}.json"
+        )
     else:
-        output_file = os.path.join(f'./outputs/liref-check/all-layers/{alpha}-liref_gsm_symbolic.json')
-    with open(output_file, 'w') as f:
+        output_file = os.path.join(
+            f"./outputs/liref-check/all-layers/{alpha}-liref_gsm_symbolic.json"
+        )
+    with open(output_file, "w") as f:
         json.dump(entry_batch, f, indent=2)
 
 
-def compute_performance_on_reason_subset(val_sampled_data=None, intervention=False, ds_name=None, alpha=None, layer=None):
-
-    
+def compute_performance_on_reason_subset(
+    val_sampled_data=None, intervention=False, ds_name=None, alpha=None, layer=None
+):
     correct_predictions = 0
     total_predictions = len(val_sampled_data)
 
     for ix, entry in tqdm(enumerate(val_sampled_data)):
-        if entry['model_predict_correctness'] == True:
+        if entry["model_predict_correctness"] == True:
             correct_predictions += 1
 
     reason_accuracy = correct_predictions / total_predictions
-    
+
     if intervention:
-        print(f"***Reason Subset {ds_name} Accuracy: {reason_accuracy:.4f} for alpha: {alpha} and layer: {layer}")
+        print(
+            f"***Reason Subset {ds_name} Accuracy: {reason_accuracy:.4f} for alpha: {alpha} and layer: {layer}"
+        )
     else:
-        print(f"***Original performance of Reason Subset {ds_name} Accuracy: {reason_accuracy:.4f}")
+        print(
+            f"***Original performance of Reason Subset {ds_name} Accuracy: {reason_accuracy:.4f}"
+        )
 
     return reason_accuracy
+
+
 # loaded_dict = torch.load('./inputs/pca/liref_mmlu_activations/mmlu-pro-3000samples.pt')
-# hs_cache_no_cot = loaded_dict['mmlu-pro_3000samples'] 
+# hs_cache_no_cot = loaded_dict['mmlu-pro_3000samples']
 
 # with open('./inputs/pca/liref_mmlu_activations/mmlu-pro-3000samples.json', 'r', encoding='utf-8') as f:
 #       sampled_data = json.load(f)
@@ -161,128 +181,162 @@ def compute_performance_on_reason_subset(val_sampled_data=None, intervention=Fal
 # reason_indices = [ix for ix, sample in enumerate(sampled_data) if sample['memory_reason_score'] > 0.5]
 # memory_indices = [ix for ix, sample in enumerate(sampled_data) if sample['memory_reason_score'] <= 0.5]
 
-#candidate_directions = get_candidate_directions(hs_cache_no_cot, model_layers_num, mlp_dim_num, reason_indices, memory_indices)
+# candidate_directions = get_candidate_directions(hs_cache_no_cot, model_layers_num, mlp_dim_num, reason_indices, memory_indices)
 
-def get_candidate_directions(hs_cache_no_cot, model_layers_num, mlp_dim_num, reason_indices, memory_indices):
 
-    candidate_directions = torch.zeros((model_layers_num, mlp_dim_num), dtype=torch.float64, device='cuda')
+def get_candidate_directions(
+    hs_cache_no_cot, model_layers_num, mlp_dim_num, reason_indices, memory_indices
+):
+    candidate_directions = torch.zeros(
+        (model_layers_num, mlp_dim_num), dtype=torch.float64, device="cuda"
+    )
 
     # calculating candidate reasoning features
     for layer in range(model_layers_num):
-            
         hs_no_cot = hs_cache_no_cot[layer]
 
         #  we store the mean activations in high-precision to avoid numerical issues
         reason_hs_no_cot = hs_no_cot[reason_indices, :].to(torch.float64)
-        #print('reason_hs_no_cot.shape: ',reason_hs_no_cot.shape) reason有点多，memory有点少，需要进一步把数据集做scale up    
+        # print('reason_hs_no_cot.shape: ',reason_hs_no_cot.shape) reason有点多，memory有点少，需要进一步把数据集做scale up
         memory_hs_no_cot = hs_no_cot[memory_indices, :].to(torch.float64)
 
         mean_reason_hs_no_cot = reason_hs_no_cot.mean(dim=0)
         mean_memory_hs_no_cot = memory_hs_no_cot.mean(dim=0)
 
-        mean_diff = mean_reason_hs_no_cot - mean_memory_hs_no_cot  #Reasoning features shape: [bsz, dims] 
+        mean_diff = (
+            mean_reason_hs_no_cot - mean_memory_hs_no_cot
+        )  # Reasoning features shape: [bsz, dims]
         candidate_directions[layer] = mean_diff
 
     return candidate_directions
 
 
 def run_intervention_experiment_from_liref_paper(alpha):
-    activations = torch.load('./inputs/liref/activations/llama3-8B-res-stream-3000-mmlu-pro.pt')
-    print(f'****Activations loaded')
+    activations = torch.load(
+        "./inputs/liref/activations/llama3-8B-res-stream-3000-mmlu-pro.pt"
+    )
+    print(f"****Activations loaded")
 
-    with open("./inputs/pca/liref_mmlu_activations/mmlu-pro-3000samples.json", 'r') as f:
+    with open(
+        "./inputs/pca/liref_mmlu_activations/mmlu-pro-3000samples.json", "r"
+    ) as f:
         data = json.load(f)
-    print(f'****MMLU data loaded for reasoning and memory indices')
-    
-    reasoning_indices = [ix for ix, sample in enumerate(data) if sample['memory_reason_score'] > 0.5]
-    memory_indices = [ix for ix, sample in enumerate(data) if sample['memory_reason_score'] <= 0.5]
+    print(f"****MMLU data loaded for reasoning and memory indices")
+
+    reasoning_indices = [
+        ix for ix, sample in enumerate(data) if sample["memory_reason_score"] > 0.5
+    ]
+    memory_indices = [
+        ix for ix, sample in enumerate(data) if sample["memory_reason_score"] <= 0.5
+    ]
 
     candidate_directions = get_candidate_directions(
         hs_cache_no_cot=activations,
         model_layers_num=32,
         mlp_dim_num=4096,
         reason_indices=reasoning_indices,
-        memory_indices=memory_indices
+        memory_indices=memory_indices,
     )
-    print(f'****Candidate directions calculated')
+    print(f"****Candidate directions calculated")
 
     diff_means_directions_cpu = candidate_directions.cpu().float()
-    torch.save(diff_means_directions_cpu, './outputs/liref/tuning/diff_means_directions.pth')
+    torch.save(
+        diff_means_directions_cpu, "./outputs/liref/tuning/diff_means_directions.pth"
+    )
 
     return
 
-    ds_name = 'GSM-symbolic'
+    ds_name = "GSM-symbolic"
     dataset_dir = "./inputs/liref"
 
-    ds_data = load_dataset(ds_name=ds_name, dataset_dir=dataset_dir, split='test')
+    ds_data = load_dataset(ds_name=ds_name, dataset_dir=dataset_dir, split="test")
 
-    print(f'****Data loaded from {ds_name}')
+    print(f"****Data loaded from {ds_name}")
 
     prompt_template, prompt_template_no_cot = load_prompt_template(ds_name=ds_name)
 
-
-    print(f'****Sampling 200 data points from {ds_name}')
+    print(f"****Sampling 200 data points from {ds_name}")
     ds_data = random.sample(ds_data, 200)
 
-    model_name = 'meta-llama/Llama-3.1-8B'
+    model_name = "meta-llama/Llama-3.1-8B"
 
-    prober = ProbeLlamaModel(max_new_tokens=200, generate_response=True, model_name=model_name)
-    
+    prober = ProbeLlamaModel(
+        max_new_tokens=200, generate_response=True, model_name=model_name
+    )
+
     accuracies = []
 
-    print(f'****Running on {ds_name} with Features Intervention and alpha: {alpha} and model: {model_name}')
+    print(
+        f"****Running on {ds_name} with Features Intervention and alpha: {alpha} and model: {model_name}"
+    )
 
     # Get accuracy of original model
     # print(f'****Running without intervention')
     # intervention_vectors = torch.zeros(32, 4096)
-    # evaluation_on_dataset(val_sampled_data=ds_data, prompts_cot=prompt_template, prompts_no_cot=prompt_template_no_cot, 
+    # evaluation_on_dataset(val_sampled_data=ds_data, prompts_cot=prompt_template, prompts_no_cot=prompt_template_no_cot,
     #                         ds_name=ds_name, run_in_fewshot=True, run_in_cot=True,
     #                         ablation_dir=intervention_vectors, alpha=0, prober=prober)
     # original_accuracy = compute_performance_on_reason_subset(val_sampled_data=ds_data, intervention=False, ds_name=ds_name, alpha=0)
     # accuracies.append(('original', original_accuracy))
-
 
     # for layer in range(15, 32):
     #     print(f'****Running on layer {layer} with intervention')
     #     if layer <= 2:
     #         continue
     #     intervention_vectors = [candidate_directions[layer]] * 32
-    #     # Replace the first 3 vectors with 0 
+    #     # Replace the first 3 vectors with 0
     #     intervention_vectors[:3] = torch.zeros(3, 4096)
-    #     evaluation_on_dataset(val_sampled_data=ds_data, prompts_cot=prompt_template, prompts_no_cot=prompt_template_no_cot, 
+    #     evaluation_on_dataset(val_sampled_data=ds_data, prompts_cot=prompt_template, prompts_no_cot=prompt_template_no_cot,
     #                         ds_name=ds_name, run_in_fewshot=True, run_in_cot=True,
     #                         ablation_dir=intervention_vectors, alpha=alpha, prober=prober, layer=layer)
 
-        
     #     reason_accuracy = compute_performance_on_reason_subset(val_sampled_data=ds_data, intervention=True, ds_name=ds_name, alpha=alpha, layer=layer)
     #     accuracies.append((layer, reason_accuracy))
-    
+
     layer = 6
     intervention_vectors = [candidate_directions[layer]] * 32
-        # Replace the first 3 vectors with 0 
+    # Replace the first 3 vectors with 0
     intervention_vectors[:3] = torch.zeros(3, 4096)
-    evaluation_on_dataset(val_sampled_data=ds_data, prompts_cot=prompt_template, prompts_no_cot=prompt_template_no_cot, 
-                            ds_name=ds_name, run_in_fewshot=True, run_in_cot=True,
-                            ablation_dir=intervention_vectors, alpha=alpha, prober=prober, layer=layer)
+    evaluation_on_dataset(
+        val_sampled_data=ds_data,
+        prompts_cot=prompt_template,
+        prompts_no_cot=prompt_template_no_cot,
+        ds_name=ds_name,
+        run_in_fewshot=True,
+        run_in_cot=True,
+        ablation_dir=intervention_vectors,
+        alpha=alpha,
+        prober=prober,
+        layer=layer,
+    )
 
-        
-    reason_accuracy = compute_performance_on_reason_subset(val_sampled_data=ds_data, intervention=True, ds_name=ds_name, alpha=alpha, layer=layer)
+    reason_accuracy = compute_performance_on_reason_subset(
+        val_sampled_data=ds_data,
+        intervention=True,
+        ds_name=ds_name,
+        alpha=alpha,
+        layer=layer,
+    )
     accuracies.append((layer, reason_accuracy))
 
     # Save the accuracies to a json file
     # Create directory if it doesn't exist
-    os.makedirs(f'./outputs/liref/final/{alpha}', exist_ok=True)
-    with open(f'./outputs/liref/final/{alpha}/liref_results_{model_name.replace("/", "_")}.json', 'w') as f:
+    os.makedirs(f"./outputs/liref/final/{alpha}", exist_ok=True)
+    with open(
+        f"./outputs/liref/final/{alpha}/liref_results_{model_name.replace('/', '_')}.json",
+        "w",
+    ) as f:
         json.dump(accuracies, f, indent=2)
     return accuracies
 
-    #print(f'****Finished running on layer {layer} with alpha {alpha}')
+    # print(f'****Finished running on layer {layer} with alpha {alpha}')
+
 
 # def test_all_layers(alpha):
 #     print(f'****Running on alpha: {alpha}')
 #     candidate_directions = json.load(open('./inputs/chess/interventions/liref_reasoning_directions.json'))
 
-#     ds_name = 'GSM-symbolic' 
+#     ds_name = 'GSM-symbolic'
 #     dataset_dir = "./inputs/liref"
 
 #     ds_data = load_dataset(ds_name=ds_name, dataset_dir=dataset_dir, split='test')
@@ -293,7 +347,7 @@ def run_intervention_experiment_from_liref_paper(alpha):
 #     print(f'****Running on {ds_name} with Features Intervention and alpha: {alpha}')
 
 #     prober = ProbeLlamaModel(max_new_tokens=200, generate_response=True, model_name='meta-llama/Llama-3.1-8B')
-    
+
 
 #     evaluation_on_dataset(val_sampled_data=ds_data, prompts_cot=prompt_template, prompts_no_cot=prompt_template_no_cot,
 #                          ds_name=ds_name, run_in_fewshot=True, run_in_cot=True,
@@ -310,45 +364,49 @@ def run_intervention_experiment_from_liref_paper(alpha):
 #         test_all_layers(alpha)
 
 if __name__ == "__main__":
+    import os
     import subprocess
     import sys
-    import os
 
     print("Setting up Poetry environment")
-    os.chdir('/gpfs/home5/jholshuijsen/reasoning-reciting-probing')
-    
+    os.chdir("/gpfs/home3/ljilesen/intervention-experiment")
+
     # Configure Poetry to create venv in project
-    subprocess.run(['poetry', 'config', 'virtualenvs.in-project', 'true', '--local'], check=True)
+    subprocess.run(
+        ["poetry", "config", "virtualenvs.in-project", "true", "--local"], check=True
+    )
 
     # Install dependencies
     print("Installing dependencies...")
-    subprocess.run(['poetry', 'install', '--no-interaction', '--no-root'], check=True)
-    
+    subprocess.run(["poetry", "install", "--no-interaction", "--no-root"], check=True)
+
     # Get the virtual environment path
-    result = subprocess.run(['poetry', 'env', 'info', '--path'], 
-                           capture_output=True, text=True, check=True)
+    result = subprocess.run(
+        ["poetry", "env", "info", "--path"], capture_output=True, text=True, check=True
+    )
     venv_path = result.stdout.strip()
-    
+
     # Activate the virtual environment by modifying sys.path
-    venv_site_packages = os.path.join(venv_path, 'lib', 
-                                     f'python{sys.version_info.major}.{sys.version_info.minor}', 
-                                     'site-packages')
+    venv_site_packages = os.path.join(
+        venv_path,
+        "lib",
+        f"python{sys.version_info.major}.{sys.version_info.minor}",
+        "site-packages",
+    )
     sys.path.insert(0, venv_site_packages)
-    
+
     print(f"Poetry virtual environment activated at: {venv_path}")
 
-
     import argparse
-    import os
     import json
-    import re
-    import torch
-    from tqdm import tqdm
+    import os
     import random
+    import re
 
+    import torch
     from probe_llama import ProbeLlamaModel
+    from tqdm import tqdm
 
-    
     parser = argparse.ArgumentParser()
     parser.add_argument("--alpha", type=float, default=0.0)
     parser.add_argument("--layer", type=int, default=None)
@@ -361,10 +419,6 @@ if __name__ == "__main__":
         torch.cuda.manual_seed(8888)
         torch.cuda.manual_seed_all(8888)
 
-    
-    print(f'****Running on alpha: {args.alpha}')
+    print(f"****Running on alpha: {args.alpha}")
 
     accuracies = run_intervention_experiment_from_liref_paper(args.alpha)
-
-
-

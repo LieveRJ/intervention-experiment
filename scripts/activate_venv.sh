@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to activate the Poetry virtual environment for the reasoning-reciting-probing project
+# Script to activate the Poetry virtual environment for the interaction-experiment project
 
 
 # Change to the project directory
@@ -28,4 +28,4 @@ echo "Poetry virtual environment activated. You're now using Python from: $(whic
 echo "To deactivate the environment when done, run: deactivate"
 
 # Keep the terminal open by running the user's shell
-exec "$SHELL" 
+exec "$SHELL"

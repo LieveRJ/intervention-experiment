@@ -7,12 +7,12 @@
 #SBATCH --mem=48G
 #SBATCH --time=05:00:00
 #SBATCH --job-name=derive_tune_combined_bal
-#SBATCH --output=/gpfs/home5/ljilesen/intervention-experiment/outputs/logs/derive_tune_combined_bal_%j.out
-#SBATCH --error=/gpfs/home5/ljilesen/intervention-experiment/outputs/logs/derive_tune_combined_bal_%j.err
+#SBATCH --output=/gpfs/home3/ljilesen/intervention-experiment/outputs/logs/derive_tune_combined_bal_%j.out
+#SBATCH --error=/gpfs/home3/ljilesen/intervention-experiment/outputs/logs/derive_tune_combined_bal_%j.err
 
 set -euo pipefail
 
-PROJECT_ROOT="/gpfs/home5/ljilesen/intervention-experiment"
+PROJECT_ROOT="/gpfs/home3/ljilesen/intervention-experiment"
 mkdir -p "$PROJECT_ROOT/outputs/logs"
 
 cd "$PROJECT_ROOT"
@@ -21,5 +21,3 @@ cd "$PROJECT_ROOT"
   --project_root "$PROJECT_ROOT" \
   --tune_target combined_balanced \
   --gsm_samples 100
-
-

@@ -1,7 +1,7 @@
 import argparse
 import os
-import sys
 import subprocess
+import sys
 from datetime import datetime
 from typing import List, Optional
 
@@ -20,9 +20,14 @@ def ensure_poetry_env(project_root: str):
     cwd = os.getcwd()
     os.chdir(project_root)
     try:
-        subprocess.run(["poetry", "config", "virtualenvs.in-project", "true", "--local"], check=True)
+        subprocess.run(
+            ["poetry", "config", "virtualenvs.in-project", "true", "--local"],
+            check=True,
+        )
         print("Installing dependencies...")
-        subprocess.run(["poetry", "install", "--no-interaction", "--no-root"], check=True)
+        subprocess.run(
+            ["poetry", "install", "--no-interaction", "--no-root"], check=True
+        )
         venv_path = os.path.join(project_root, ".venv")
         venv_python = os.path.join(venv_path, "bin", "python")
         if os.path.isfile(venv_python):
@@ -31,10 +36,17 @@ def ensure_poetry_env(project_root: str):
                 script_path = os.path.abspath(sys.argv[0])
                 os.execv(venv_python, [venv_python, script_path] + sys.argv[1:])
         else:
-            result = subprocess.run(["poetry", "env", "info", "--path"], capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                ["poetry", "env", "info", "--path"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
             venv_path = result.stdout.strip()
             venv_python = os.path.join(venv_path, "bin", "python")
-            if os.path.isfile(venv_python) and os.path.realpath(sys.executable) != os.path.realpath(venv_python):
+            if os.path.isfile(venv_python) and os.path.realpath(
+                sys.executable
+            ) != os.path.realpath(venv_python):
                 print(f"Re-executing with Poetry venv interpreter: {venv_python}")
                 script_path = os.path.abspath(sys.argv[0])
                 os.execv(venv_python, [venv_python, script_path] + sys.argv[1:])
@@ -76,23 +88,53 @@ def build_intervention_vectors(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Collect base8 arithmetic activations with optimal direction applied.")
-    parser.add_argument("--project_root", type=str, default="/gpfs/home5/ljilesen/intervention-experiment")
-    parser.add_argument("--direction_path", type=str, default="/home/ljilesen/intervention-experiment/outputs/optimal_directions/arithmetic-base8/optimal_direction.pth")
+    parser = argparse.ArgumentParser(
+        description="Collect base8 arithmetic activations with optimal direction applied."
+    )
+    parser.add_argument(
+        "--project_root",
+        type=str,
+        default="/gpfs/home3/ljilesen/intervention-experiment",
+    )
+    parser.add_argument(
+        "--direction_path",
+        type=str,
+        default="/home/ljilesen/intervention-experiment/outputs/optimal_directions/arithmetic-base8/optimal_direction.pth",
+    )
     parser.add_argument("--alpha", type=float, default=0.05)
     parser.add_argument("--chunk_size", type=int, default=1000)
     parser.add_argument("--chunk_id", type=int, default=0)
-    parser.add_argument("--input_path", type=str, default="/home/ljilesen/intervention-experiment/inputs/arithmetic/data/base8.txt")
-    parser.add_argument("--output_dir", type=str, default="/home/ljilesen/intervention-experiment/outputs/arithmetic/intervention/optimal_base8_eval/")
-    parser.add_argument("--inject_layer", type=int, default=-1, help="If >=0, apply only at this layer; otherwise apply at all layers (zeroing first N).")
-    parser.add_argument("--zero_first_n", type=int, default=3, help="When applying to all layers, set the first N layers to zero.")
+    parser.add_argument(
+        "--input_path",
+        type=str,
+        default="/home/ljilesen/intervention-experiment/inputs/arithmetic/data/base8.txt",
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="/home/ljilesen/intervention-experiment/outputs/arithmetic/intervention/optimal_base8_eval/",
+    )
+    parser.add_argument(
+        "--inject_layer",
+        type=int,
+        default=-1,
+        help="If >=0, apply only at this layer; otherwise apply at all layers (zeroing first N).",
+    )
+    parser.add_argument(
+        "--zero_first_n",
+        type=int,
+        default=3,
+        help="When applying to all layers, set the first N layers to zero.",
+    )
     args = parser.parse_args()
 
     # Ensure Poetry env like cross-eval job; will re-exec under Poetry venv if needed
     try:
         ensure_poetry_env(args.project_root)
     except Exception as e:
-        print(f"Warning: Poetry setup failed or Poetry not installed ({e}); continuing with current interpreter.")
+        print(
+            f"Warning: Poetry setup failed or Poetry not installed ({e}); continuing with current interpreter."
+        )
     add_code_to_sys_path(args.project_root)
 
     # Imports that rely on sys.path
@@ -102,7 +144,9 @@ def main():
 
     direction = load_optimal_direction(args.direction_path)
     inject_layer = None if args.inject_layer < 0 else int(args.inject_layer)
-    intervention_vectors = build_intervention_vectors(direction, inject_layer=inject_layer, zero_first_n=args.zero_first_n)
+    intervention_vectors = build_intervention_vectors(
+        direction, inject_layer=inject_layer, zero_first_n=args.zero_first_n
+    )
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_out = os.path.join(
@@ -115,7 +159,9 @@ def main():
     print(f"Input file   : {args.input_path}")
     print(f"Output dir   : {run_out}")
     print(f"Alpha        : {args.alpha}")
-    print(f"Inject layer : {'all (zero_first_n=' + str(args.zero_first_n) + ')' if inject_layer is None else inject_layer}")
+    print(
+        f"Inject layer : {'all (zero_first_n=' + str(args.zero_first_n) + ')' if inject_layer is None else inject_layer}"
+    )
 
     experiment = ArithmeticExperiment(
         input_path=args.input_path,
@@ -139,5 +185,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
