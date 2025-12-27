@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument(
         "--experiment", 
         type=str, 
-        default="kk",
+        default="chess",
         choices=["chess", "kk", "arithmetic"],
         help="Type of dataset to use for probing"
     )

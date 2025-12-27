@@ -127,7 +127,7 @@ CMD="python code/main.py \
     --max_new_tokens 2048 \
     --chunk_size $CHUNK_SIZE \
     --chunk_id $CHUNK_ID \
-    --invervention_vector_path ./inputs/chess/interventions/liref_reasoning_directions.json \
+    --intervention_vector_path ./inputs/chess/interventions/liref_reasoning_directions.json \
     --experiment_type intervention"
 
 # Add chunk_id only if it's provided
