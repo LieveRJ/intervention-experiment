@@ -28,15 +28,21 @@ setup_and_submit() {
 
     # If INPUT_PATH is a directory, find the first .jsonl file inside
     if [[ -d "$input_path" ]]; then
-        local jsonl_file=$(find "$input_path" -maxdepth 1 -type f -name '*.jsonl' | head -n 1)
-        if [[ -z "$jsonl_file" ]]; then
-            echo "ERROR: No .jsonl file found in directory: $input_path"
+        jsonl_file=$(find "$input_path" -maxdepth 1 -type f -name '*.jsonl' | head -n 1)
+        json_file=$(find "$input_path" -maxdepth 1 -type f -name '*.json' | head -n 1)
+
+        if [[ -n "$jsonl_file" ]]; then
+            echo "Using $jsonl_file as the input file."
+            input_file_path="$jsonl_file"
+        elif [[ -n "$json_file" ]]; then
+            echo "Using $json_file as the input file."
+            input_file_path="$json_file"
+        else
+            echo "ERROR: No .jsonl or .json file found in directory: $input_path"
             exit 1
         fi
-        echo "Using $jsonl_file as the input file."
-        input_file_path="$jsonl_file"
     fi
-    
+
 
     if [[ ! -f "$input_file_path" ]]; then
         echo "ERROR: Input folder not found: $input_path"
@@ -81,7 +87,7 @@ EOF
         --job-name=llama_chunks \
         --partition=$PARTITION \
         --gpus=$GPUS_PER_TASK \
-        --cpus-per-task=$CPUS_PER_TASK \
+        --cpus-per-task=$CPUS_PER_TASK \b
         --time=$TIME \
         --output="$temp_dir/chunk_%a/logs/slurm_%A_%a.out" \
         --error="$temp_dir/chunk_%a/logs/slurm_%A_%a.err" \
