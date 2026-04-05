@@ -87,7 +87,7 @@ EOF
         --job-name=llama_chunks \
         --partition=$PARTITION \
         --gpus=$GPUS_PER_TASK \
-        --cpus-per-task=$CPUS_PER_TASK \b
+        --cpus-per-task=$CPUS_PER_TASK \
         --time=$TIME \
         --output="$temp_dir/chunk_%a/logs/slurm_%A_%a.out" \
         --error="$temp_dir/chunk_%a/logs/slurm_%A_%a.err" \
